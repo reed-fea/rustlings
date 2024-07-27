@@ -15,22 +15,31 @@ struct Team {
     goals_conceded: u8,
 }
 
-fn build_scores_table(results: &str) -> HashMap<&str, Team> {
-    // The name of the team is the key and its associated struct is the value.
+// 更新球队信息的函数
+fn update_team_scores(scores: &mut HashMap<String, Team>, team_name: &str, goals_scored: u8, goals_conceded: u8) {
+    let entry = scores.entry(team_name.to_string()).or_insert(Team {
+        goals_scored: 0,
+        goals_conceded: 0,
+    });
+    entry.goals_scored += goals_scored;
+    entry.goals_conceded += goals_conceded;
+}
+
+fn build_scores_table(results: &str) -> HashMap<String, Team> {
+    // 使用球队名作为键，结构体作为值
     let mut scores = HashMap::new();
 
     for line in results.lines() {
         let mut split_iterator = line.split(',');
-        // NOTE: We use `unwrap` because we didn't deal with error handling yet.
+        // 使用 unwrap 是为了简化代码，实际应用中应该处理错误
         let team_1_name = split_iterator.next().unwrap();
         let team_2_name = split_iterator.next().unwrap();
         let team_1_score: u8 = split_iterator.next().unwrap().parse().unwrap();
         let team_2_score: u8 = split_iterator.next().unwrap().parse().unwrap();
 
-        // TODO: Populate the scores table with the extracted details.
-        // Keep in mind that goals scored by team 1 will be the number of goals
-        // conceded by team 2. Similarly, goals scored by team 2 will be the
-        // number of goals conceded by team 1.
+        // 更新 team_1 和 team_2 的进球和失球信息
+        update_team_scores(&mut scores, team_1_name, team_1_score, team_2_score);
+        update_team_scores(&mut scores, team_2_name, team_2_score, team_1_score);
     }
 
     scores
